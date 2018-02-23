@@ -1,6 +1,6 @@
 猫爪文本
 ==================================
-猫爪文本以[okooospiderman3.0_advanced为范例](https://github.com/Utschie/pythonwork/blob/master/okooospiderman/okooospiderman3.0_advanced.py)，用scrapy实现该程序所有功能，包括:
+猫爪文本以[_okooospiderman3.0_advanced_](https://github.com/Utschie/pythonwork/blob/master/okooospiderman/okooospiderman3.0_advanced.py)为范例，用scrapy实现该程序所有功能，包括:
 ----------------
 >*自动按照指定日期跳转到数据页面*
 >*自动随机账户登录*  
