@@ -2,9 +2,9 @@
 ==================================
 猫爪文本以[_okooospiderman3.0_advanced_](https://github.com/Utschie/pythonwork/blob/master/okooospiderman/okooospiderman3.0_advanced.py)为范例，用scrapy实现该程序所有功能，包括:
 ----------------
->*自动按照指定日期跳转到数据页面*
+>*自动按照指定日期跳转到数据页面*  
 >*自动随机账户登录*  
->*自动识别验证码*
+>*自动识别验证码*  
 >*随机IP*  
 >*随机UA*  
 >*爬虫并发*  
