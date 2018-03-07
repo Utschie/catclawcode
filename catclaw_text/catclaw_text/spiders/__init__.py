@@ -14,6 +14,8 @@
 
 #所以本爬虫的结构为：spiders发出初始登录请求①，得到response⑤返回给spiders⑥，发现登录成功后继续发出请求⑦，进入当天比赛得到response⑤并返回⑥给spiders，spiders得到
 #了当天的比赛列表后再度发出请求⑦，进入单场比赛，途中经由splash加载出动态呈现的公司列表，从response⑤返回给spiders⑥，spiders得到单场比赛的公司列表后第三次发出请求⑦（同
-#时也是第四次发出请求），从response⑤返回给spiders⑥，经由spidermiddlewares传给ITEM_PIPELINES，入库，本次小循环完成。
-#一天的小循环结束后，spiders再开始第二天的小循环。与此同时，分布式的其他终端也在进行天复一天的小循环。（其中序号①⑤⑥⑦代表的是scrapy教程中architecture overview中
+#时也是第四次发出请求），从response⑤返回给spiders⑥，得到item⑦经由spidermiddlewares传给ITEM_PIPELINES⑧，入库，同时通知spiders开启下一个session⑦登录请求，即第二天的爬取。
+#与此同时，分布式的其他终端也在进行同样的动作，只是范围不同。（其中序号①⑤⑥⑦代表的是scrapy教程中architecture overview中
 #的序号）————2018年3月7日
+
+#本程序的开发过程是，先使project做成从开始到结束只运行一个session，即只爬取一天比赛就结束的程序。然后再看能否在一个project中循环地开启新session。————2018年3月8日
