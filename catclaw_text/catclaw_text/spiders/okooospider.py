@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#妈的怎么本来好好的就编辑器就无响应了呢？！！！艹！！！————17.03.2018
 ' okooospiderman的scrapy版本 '
 
 __author__ = 'Uyschie Dym'
@@ -81,6 +81,7 @@ class okooospider(scrapy.Spider):
                         }
         yield request
 
-
     def zuqiuzhongxin(self, response):
-        request = Request(url='http://www.okooo.com/soccer/',headers = )
+        header2 = header
+        header2[]
+        request = Request(url='http://www.okooo.com/soccer/',headers=header2, )
