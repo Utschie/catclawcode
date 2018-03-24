@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#妈的怎么本来好好的就编辑器就无响应了呢？！！！艹！！！————17.03.2018
-#函数scrapy_splash之前的部分经测试没有问题——24.03.2018
-' okooospiderman的scrapy版本 '
-
-__author__ = 'Uyschie Dym'
-
+#用来在shell里测试用的代码
 import scrapy
 from scrapy.http import FormRequest, Request
 import YDM
@@ -78,49 +71,31 @@ def dateRange(start, end, step=1, format="%Y-%m-%d"):#生成日期的函数，�
 
 
 datelist = dateRange("2017-09-30", "2017-10-31")#datelist是一个生成器，每次调用会返回下一个日期
-class okooospider(scrapy.Spider):
 
-    def start_request(self):#从http://www.okooo.com/jingcai/开启会话，并获得验证码
-        url = 'http://www.okooo.com/jingcai/'
-        yield Request(url=url,headers=header,meta=meta1,callback=self.login)
+url = 'http://www.okooo.com/jingcai/'
+request = Request(url=url,headers=header,meta=meta1)
+fetch(request)
+request = Request(url='http://www.okooo.com/I/?method=ok.user.settings.authcodepic',headers=header,meta=meta1)
+fetch(request)
+filepath = '/home/jsy/screenshot/yanzhengma.png'
+with open(filepath,"wb") as f:
+    f.write(response.body)#保存验证码到本地\
 
-    def yanzhengma(self, response):#请求验证码
-        request = Request(url='http://www.okooo.com/I/?method=ok.user.settings.authcodepic',headers=header,meta=meta1,callback=self.login)
-        yield request
-
-    def login(self,response):#将得到的验证码保存并传到云打码识别，随后随机账户登录
-        filepath = '/home/jsy/screenshot/yanzhengma.png'
-        with open(filepath,"wb") as f:
-            f.write(response.body)#保存验证码到本地
-        print('已获得验证码')
-        datas = randomdatas(filepath)
-        print('云打码已尝试一次')
-        request = FormRequest(url='http://www.okooo.com/I/?method=user.user.userlogin',formdata=datas,meta=meta2,callback=self.zuqiuzhongxin)
-        yield request
-
-    def zuqiuzhongxin(self,response):#登陆后进入足球中心页面
-        request = Request(url='http://www.okooo.com/soccer/',headers=header,meta=meta2,callback=self.zuqiurili)
-        yield request
-
-    def zuqiurili(self,response):#进入足球中心后再进入足球日历
-        request = Request(url='http://www.okooo.com/soccer/match/',headers=header2,meta=meta2,callback=self.dangtianbisai)
-        yield request
-
-    def dangtianbisai(self,response):#每次调用从datelist里取出一个日期来,进入那一天，得到当天比赛列表
-        date = next(datelist)
-        request = Request(url='http://www.okooo.com/soccer/match/?date=' + date,headers=header2,callback=self.danchangbisai)
-        request.meta = {'dont_redirect':True,
-                        'download_timeout':31,
-                        'dont_obey_robotstxt':True,
-                        }
-        yield request
-
-    def danchangbisai(self,response):#从dangtianbisai的源码中获取比赛列表，并同步进行
-        content1 = response.body.decode('GB18030')
-        sucker1 = '/soccer/match/.*?/odds/'
-        bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
-        print(str(bisaiurl))
-        for i in range(0.len(bisaiurl)):
-            yield Request(url='http://www.okooo.com' + bisaiurl[i] ,headers=header2,meta=meta1,callback=self.scrapy_splash)
-
-    def scrapy_splash(self,response):#利用splash加载出每场比赛的脚本从而获得每场比赛的公司列表
+print('已获得验证码')
+datas = randomdatas(filepath)
+print('云打码已尝试一次')
+request = FormRequest(url='http://www.okooo.com/I/?method=user.user.userlogin',formdata=datas,meta=meta2)
+fetch(request)
+request = Request(url='http://www.okooo.com/soccer/',headers=header,meta=meta2)
+fetch(request)
+request = Request(url='http://www.okooo.com/soccer/match/',headers=header2,meta=meta2)
+fetch(request)
+date = next(datelist)
+request = Request(url='http://www.okooo.com/soccer/match/?date=' + date,headers=header2,meta=meta1)
+fetch(request)
+content1 = response.body.decode('GB18030')
+sucker1 = '/soccer/match/.*?/odds/'
+bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
+print(str(bisaiurl))
+request = Request(url='http://www.okooo.com' + bisaiurl[1] ,headers=header2,meta=meta1)
+fetch(request)
