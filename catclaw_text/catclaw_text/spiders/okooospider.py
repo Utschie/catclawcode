@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #妈的怎么本来好好的就编辑器就无响应了呢？！！！艹！！！————17.03.2018
-#函数scrapy_splash之前的部分经测试没有问题——24.03.2018
+#函数scrapy_splash之前的部分经测试没有问题————24.03.2018
+#决定放弃使用splash，而是直接在相应网页的ajax请求中直接得到公司列表————25.03.2018
 ' okooospiderman的scrapy版本 '
 
 __author__ = 'Uyschie Dym'
@@ -121,6 +122,6 @@ class okooospider(scrapy.Spider):
         bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
         print(str(bisaiurl))
         for i in range(0.len(bisaiurl)):
-            yield Request(url='http://www.okooo.com' + bisaiurl[i] ,headers=header2,meta=meta1,callback=self.scrapy_splash)
+            yield Request(url='http://www.okooo.com' + bisaiurl[i],headers=header2,meta=meta1,callback=self.scrapy_splash)
 
-    def scrapy_splash(self,response):#利用splash加载出每场比赛的脚本从而获得每场比赛的公司列表
+    def ajax_companylist(self,response):#利用相应的ajax请求从而获得每场比赛的公司列表

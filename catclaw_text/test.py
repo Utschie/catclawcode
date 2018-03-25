@@ -1,4 +1,5 @@
 #用来在shell里测试用的代码
+#决定放弃使用splash，而是直接在相应网页的ajax请求中直接得到公司列表————25.03.2018
 import scrapy
 from scrapy.http import FormRequest, Request
 import YDM
@@ -7,7 +8,6 @@ import urllib
 import re
 import csv
 from datetime import datetime, timedelta, timezone#用来把时间字符串转换成时间
-
 UAcontent = urllib.request.urlopen('file:///home/jsy/Dropbox/useragentswitcher.xml').read()
 UAcontent = str(UAcontent)
 UAname = re.findall('(useragent=")(.*?)(")',UAcontent)
@@ -97,5 +97,5 @@ content1 = response.body.decode('GB18030')
 sucker1 = '/soccer/match/.*?/odds/'
 bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
 print(str(bisaiurl))
-request = Request(url='http://www.okooo.com' + bisaiurl[1] ,headers=header2,meta=meta1)
+request = Request(url='http://www.okooo.com' + bisaiurl[97],headers=header2,meta=meta1)
 fetch(request)
