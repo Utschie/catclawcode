@@ -40,6 +40,11 @@ meta2 = {'dont_redirect':True,
         'download_timeout':16,
         'dont_obey_robotstxt':True,
         }
+meta3 = {'dont_redirect':True,
+        'download_timeout':9.5,
+        'dont_obey_robotstxt':True,
+        }
+
 
 def randomdatas(filename):#把filepath传给它，它就能得到一个随机的登录账户
     User = list()
@@ -122,6 +127,19 @@ class okooospider(scrapy.Spider):
         bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
         print(str(bisaiurl))
         for i in range(0.len(bisaiurl)):
-            yield Request(url='http://www.okooo.com' + bisaiurl[i],headers=header2,meta=meta1,callback=self.scrapy_splash)
+            yield Request(url='http://www.okooo.com' + bisaiurl[i],headers=header2,meta=meta1,callback=self.ajax_companylist)
 
-    def ajax_companylist(self,response):#利用相应的ajax请求从而获得每场比赛的公司列表
+    def ajax_companylist(self,response):#根据每一场比赛的链接提交ajax请求，得到的response传递给einzelcompany函数
+        for i in range(0,450,30):
+            yield Request(url=response.url+'ajax/?page='+str(i)+'&trnum='+str(30*i)+'&companytype=BaijiaBooks&type=0',headers=header2,meta=meta1,callback=self.einzelcompany)
+
+    def einzelcompany(self,response):#从ajax请求下来的非空源码中获取某一场里面的单个公司的链接，并提交请求,
+        if len(response.text) > 163:
+            sucker2 = 'href="(http://www.okooo.com/soccer/match/.*?/odds/change/.*?/)"'
+            companylist = re.findall(sucker2,response.text)
+            companylist = list(set(companylist))#得到了一组单个公司的链接列表
+            for i in companylist:
+                yield Request(url=i,headers=header2,meta=meta3,callback=self.datatopipeline)
+
+    def datatopipeline(self,response):#单个公司页面从得到的response中提取出数据传给pipeline
+        

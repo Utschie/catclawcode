@@ -97,5 +97,16 @@ content1 = response.body.decode('GB18030')
 sucker1 = '/soccer/match/.*?/odds/'
 bisaiurl = re.findall(sucker1,content1)#获得当天的比赛列表
 print(str(bisaiurl))
-request = Request(url='http://www.okooo.com' + bisaiurl[97],headers=header2,meta=meta1)
+request = Request(url='http://www.okooo.com' + bisaiurl[97],headers=header2,meta=meta1)#进入当天曼联那场比赛
+fetch(request)
+request = Request(url=response.url+'ajax/?page='+'15'+'&trnum='+'450'+'&companytype=BaijiaBooks&type=0',headers=header2,meta=meta2)#请求一个超范围的ajax
+fetch(request)
+request = Request(url='http://www.okooo.com' + bisaiurl[97],headers=header2,meta=meta1)#进入当天曼联那场比赛
+fetch(request)
+request = Request(url=response.url+'ajax/?page='+'0'+'&trnum='+'0'+'&companytype=BaijiaBooks&type=0',headers=header2,meta=meta2)#请求第一个ajax
+fetch(request)
+sucker2 = 'href="(http://www.okooo.com/soccer/match/.*?/odds/change/.*?/)"'
+companylist = re.findall(sucker2,response.text)
+companylist = list(set(companylist))#得到了一组单个公司的链接列表
+request = Request(url=companylist[2],headers=header2,meta=meta3)
 fetch(request)
