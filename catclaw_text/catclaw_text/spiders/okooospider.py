@@ -14,7 +14,11 @@ import random
 import urllib
 import re
 import csv
+from bs4 import BeautifulSoup#在提取代码的时候还是要用到beautifulsoup来提取标签
 from datetime import datetime, timedelta, timezone#用来把时间字符串转换成时间
+import pytz#用来设置时区信息
+import os#用来获取文件名列表
+
 
 UAcontent = urllib.request.urlopen('file:///home/jsy/Dropbox/useragentswitcher.xml').read()
 UAcontent = str(UAcontent)
@@ -142,4 +146,68 @@ class okooospider(scrapy.Spider):
                 yield Request(url=i,headers=header2,meta=meta3,callback=self.datatopipeline)
 
     def datatopipeline(self,response):#单个公司页面从得到的response中提取出数据传给pipeline
-        
+        content3 = response.text.decode('gb18030')
+        sucker3 = '<a class="bluetxt" href="/soccer/match/(.*?)/odds/change/(.*?)/">'
+        sucker4 = '> <b>(.*?)</b>'
+        sucker5 = '/schedule/">(.*?)</a>'
+        sucker6 = 'odds/">(.*?) vs (.*?)</a>'
+        cid = re.search(sucker3,content3).group(2)
+        urlnum = re.search(sucker3,content3).group(1)
+        companyname = re.search(sucker4,content3).group(1)
+        league = re.search(sucker5,content3).group(1)
+        zhudui = re.search(sucker6,content3).group(1)
+        kedui = re.search(sucker6,content3).group(2)
+        collection = db[date + '_'+ urlnum]
+        soup = BeautifulSoup(content3,"lxml")
+        table = soup.table
+        tr = table.find_all('tr')
+        del tr[0],tr[0],tr[1]
+        s1 = list()
+        for x in range(0,len(tr)):
+            s1.append(str(tr[x]))
+        sucker7 = '(>)(.*?)(<)'
+        s2 = list()#s2为存储时间和赔率的列表
+        for u in range(0,len(s1)):
+            uu = re.findall(sucker7,s1[u])
+            uuu = list()
+            for w in range(0,len(uu)):
+                uuu.append(uu[w][1])
+            while '' in uuu:
+                uuu.remove('')#去除列表中的空元素
+            for i in range(0,len(uuu)):
+                if uuu[i][-1] == '↑':#去除列表中的箭头们
+                    uuu[i] = uuu[i][:-1]
+                elif uuu[i][-1] == '↓':
+                    uuu[i] = uuu[i][:-1]
+            for i in range(2,len(uuu)):
+                uuu[i] = float(uuu[i])
+            s2.append(uuu)
+        tzinfo = pytz.timezone('Etc/GMT-8')#先定义时区信息,这里代表北京时间
+        for i in range(0,len(s2)):#把s2中的时间转换成UTC时间
+            s2[i][0] = datetime.strptime(s2[i][0][:16],'%Y/%m/%d %H:%M')#先转成datetime实例（北京时间）
+            s2[i][0] = s2[i][0].replace(tzinfo = tzinfo)#讲时间都标上北京时间
+            s2[i][0] = s2[i][0].astimezone(timezone(timedelta(hours=0)))#转换成utc时间
+        for i in range(0,len(s2)):#把概率转化成百分比
+            s2[i][5] = round(s2[i][5]*0.01,4)#还必须得四舍五入，要不然不是两位小数
+            s2[i][6] = round(s2[i][6]*0.01,4)
+            s2[i][7] = round(s2[i][7]*0.01,4)
+        for i in range(0,len(s2)):#把剩余时间转化成分钟数
+            match = re.match('赛前(.*?)小时(.*?)分',s2[i][1])
+            s2[i][1] = int(match.group(1))*60 + int(match.group(2))#转化成据比赛开始前的剩余分钟数
+        for i in range(0,len(s2)):#每一次变盘就插入一个记录
+            item = CatclawTextItem()
+            item['league'] = league
+            item['cid'] = cid
+            item['zhudui'] = zhudui
+            item['kedui'] = kedui
+            item['companyname'] = companyname
+            item['timestamp'] = s2[i][0]
+            item['resttime'] = s2[i][1]
+            item['peilv'] = [s2[i][2],s2[i][3],s2[i][4]]
+            item['gailv'] = [s2[i][5],s2[i][6],s2[i][7]]
+            item['kailizhishu'] = [s2[i][8],s2[i][9],s2[i][10]]
+            item['fanhuanlv'] = s2[i][11]
+            yield item
+
+        def repeat(self):
+            
