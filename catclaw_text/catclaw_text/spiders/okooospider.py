@@ -9,6 +9,7 @@ __author__ = 'Uyschie Dym'
 
 import scrapy
 from scrapy.http import FormRequest, Request
+from catclaw_text.items import CatclawTextItem
 import YDM
 import random
 import urllib
@@ -92,10 +93,14 @@ class okooospider(scrapy.Spider):
 
     def start_request(self):#从http://www.okooo.com/jingcai/开启会话，并获得验证码
         url = 'http://www.okooo.com/jingcai/'
-        yield Request(url=url,headers=header,meta=meta1,callback=self.login)
+        for i in datelist:
+            request = Request(url=url,headers=header,meta=meta1,callback=self.login)
+            request.meta['date'] = i
+            yield request
 
     def yanzhengma(self, response):#请求验证码
         request = Request(url='http://www.okooo.com/I/?method=ok.user.settings.authcodepic',headers=header,meta=meta1,callback=self.login)
+        request.meta['date'] = response.meta['date']
         yield request
 
     def login(self,response):#将得到的验证码保存并传到云打码识别，随后随机账户登录
@@ -106,18 +111,21 @@ class okooospider(scrapy.Spider):
         datas = randomdatas(filepath)
         print('云打码已尝试一次')
         request = FormRequest(url='http://www.okooo.com/I/?method=user.user.userlogin',formdata=datas,meta=meta2,callback=self.zuqiuzhongxin)
+        request.meta['date'] = response.meta['date']
         yield request
 
     def zuqiuzhongxin(self,response):#登陆后进入足球中心页面
         request = Request(url='http://www.okooo.com/soccer/',headers=header,meta=meta2,callback=self.zuqiurili)
+        request.meta['date'] = response.meta['date']
         yield request
 
     def zuqiurili(self,response):#进入足球中心后再进入足球日历
         request = Request(url='http://www.okooo.com/soccer/match/',headers=header2,meta=meta2,callback=self.dangtianbisai)
+        request.meta['date'] = response.meta['date']
         yield request
 
     def dangtianbisai(self,response):#每次调用从datelist里取出一个日期来,进入那一天，得到当天比赛列表
-        date = next(datelist)
+        date = response.meta['date']
         request = Request(url='http://www.okooo.com/soccer/match/?date=' + date,headers=header2,callback=self.danchangbisai)
         request.meta = {'dont_redirect':True,
                         'download_timeout':31,
@@ -208,6 +216,3 @@ class okooospider(scrapy.Spider):
             item['kailizhishu'] = [s2[i][8],s2[i][9],s2[i][10]]
             item['fanhuanlv'] = s2[i][11]
             yield item
-
-        def repeat(self):
-            
